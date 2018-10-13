@@ -18,9 +18,12 @@
  * Use of Google is not encouraged
  * 
  */
-const grid = [];
+let grid = [];
 const GRID_LENGTH = 3;
 let turn = 'X';
+
+const playerType = 1;
+const computerType = 2;
 
 function initializeGrid() {
     for (let colIdx = 0;colIdx < GRID_LENGTH; colIdx++) {
@@ -71,22 +74,139 @@ function renderMainGrid() {
     parent.innerHTML = '<div class="columnsStyle">' + columnDivs + '</div>';
 }
 
-function onBoxClick() {
-    var rowIdx = this.getAttribute("rowIdx");
-    var colIdx = this.getAttribute("colIdx");
-    let newValue = 1;
-    grid[colIdx][rowIdx] = newValue;
-    renderMainGrid();
-    addClickHandlers();
-}
-
 function addClickHandlers() {
     var boxes = document.getElementsByClassName("box");
     for (var idx = 0; idx < boxes.length; idx++) {
-        boxes[idx].addEventListener('click', onBoxClick, false);
+      boxes[idx].addEventListener('click', onBoxClick, false);
     }
 }
 
-initializeGrid();
-renderMainGrid();
-addClickHandlers();
+function onBoxClick() {
+    var rowIdx = this.getAttribute("rowIdx");
+    var colIdx = this.getAttribute("colIdx");
+
+    let winner = isGameWonAlready(); 
+
+    if (winner == playerType || winner == computerType) {
+      showWinner(winner);
+      return;
+    }
+
+    if (grid[colIdx][rowIdx] == 0) {
+      let newValue = 1;
+      grid[colIdx][rowIdx] = newValue;
+      renderMainGrid();
+      addClickHandlers();
+      playNextComputerMove();
+    }
+}
+
+
+resetGame();
+
+
+function showWinner(type) {
+  let winnerElement = document.getElementById('winner');
+  document.getElementById('computer-thinking').innerText = '';
+  if (type == playerType) {
+    winnerElement.innerText = 'The humans won...';
+  } else {
+    winnerElement.innerText = 'The bots won...';
+  }
+}
+
+function playNextComputerMove() {
+  let winner = isGameWonAlready(); 
+  if (winner == playerType || winner == computerType) {
+    showWinner(winner);
+    return;
+  }
+
+  showComputerThinking();
+  let currentConfig = grid[0].toString() +',' + grid[1].toString() + ',' + grid[2].toString();
+  currentConfig = currentConfig.split(',');
+  let testConfig = currentConfig;
+  let movesToMake = [];
+  for (let i = 0; i < 9; i++) {
+    if (testConfig[i] == 0) {
+      testConfig[i] = 2;
+      if (!hasWon(playerType, testConfig)) {
+        movesToMake.push(i);
+      }
+    }
+  }
+
+  let randomIndex = getRandomNumber(0, movesToMake.length);
+  let moveToMake = movesToMake[randomIndex];
+
+  if (moveToMake > 0) {
+    let rowIndex = parseInt(moveToMake /3);
+    let columnIndex = parseInt(moveToMake % 3);
+    grid[rowIndex][columnIndex] = computerType;
+    renderMainGrid();
+    addClickHandlers();
+  }
+}
+
+function showComputerThinking() {
+  let thinkingElement = document.getElementById('computer-thinking');
+  thinkingElement.innerText = 'The bot is thinking ...';
+  var randomTime = getRandomNumber(0, 1500);
+  setTimeout(() => {
+    thinkingElement.innerText = 'Humans turn';  
+  }, randomTime);
+  
+}
+
+
+function getRandomNumber(lowerLimit, upperLimit) {
+  return Math.floor(Math.random() * upperLimit) + lowerLimit;
+}
+
+function isGameWonAlready() {
+  let currentConfig = grid[0].toString() +',' + grid[1].toString() + ',' + grid[2].toString();
+  currentConfig = currentConfig.split(',');
+  if (hasWon(playerType, currentConfig)) {
+    return playerType;
+  } else if (hasWon(computerType, currentConfig)) {
+    return computerType;
+  } else {
+    return 0;
+  }
+}
+
+
+function resetGame() {
+  grid = [];
+  initializeGrid();
+  renderMainGrid();
+  addClickHandlers();
+  document.getElementById('winner').innerText = '';
+  document.getElementById('computer-thinking').innerText = '';
+}
+
+
+
+function hasWon(playerType, config) {
+  const winningConfig = [
+    [0, 1, 2],
+    [3, 4, 5],
+    [6, 7, 8],
+    [0, 3, 6],
+    [1, 4, 7],
+    [2, 5, 8],
+    [0, 4, 8],
+    [2, 4, 6]
+  ];
+
+  for (let i=0; i<9; i++) {
+    if (winningConfig[i]) {
+      if (config[winningConfig[i][0]] == playerType && 
+        config[winningConfig[i][1]] == playerType && 
+        config[winningConfig[i][2]] == playerType) {
+        return true;
+      } 
+    }
+  }
+  return false;
+}
