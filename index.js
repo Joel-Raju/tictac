@@ -90,6 +90,9 @@ function onBoxClick() {
     if (winner == playerType || winner == computerType) {
       showWinner(winner);
       return;
+    } else if (isGameEnded()) {
+      showGameEnded();
+      return;
     }
 
     if (grid[colIdx][rowIdx] == 0) {
@@ -120,6 +123,9 @@ function playNextComputerMove() {
   if (winner == playerType || winner == computerType) {
     showWinner(winner);
     return;
+  } else if (isGameEnded()) {
+    showGameEnded();
+    return;
   }
 
   showComputerThinking();
@@ -139,7 +145,7 @@ function playNextComputerMove() {
   let randomIndex = getRandomNumber(0, movesToMake.length);
   let moveToMake = movesToMake[randomIndex];
 
-  if (moveToMake > 0) {
+  if (moveToMake >= 0) {
     let rowIndex = parseInt(moveToMake /3);
     let columnIndex = parseInt(moveToMake % 3);
     grid[rowIndex][columnIndex] = computerType;
@@ -151,7 +157,7 @@ function playNextComputerMove() {
 function showComputerThinking() {
   let thinkingElement = document.getElementById('computer-thinking');
   thinkingElement.innerText = 'The bot is thinking ...';
-  var randomTime = getRandomNumber(0, 1500);
+  var randomTime = getRandomNumber(0, 700);
   setTimeout(() => {
     thinkingElement.innerText = 'Humans turn';  
   }, randomTime);
@@ -183,8 +189,27 @@ function resetGame() {
   addClickHandlers();
   document.getElementById('winner').innerText = '';
   document.getElementById('computer-thinking').innerText = '';
+  document.getElementById('game-end').innerText = '';
 }
 
+
+function isGameEnded() {
+  let currentConfig = grid[0].toString() +',' + grid[1].toString() + ',' + grid[2].toString();
+  currentConfig = currentConfig.split(',');
+  var isEnded = true;
+  for (let i=0; i<9; i++) {
+    if (currentConfig[i] != playerType && currentConfig[i] != computerType) {
+      isEnded = false;
+    }
+  }
+  return isEnded;
+}
+
+function showGameEnded() {
+  let gameEndElement = document.getElementById('game-end');
+  gameEndElement.innerText = 'Game Ended, please reset';
+  document.getElementById('computer-thinking').innerText = '';
+}
 
 
 function hasWon(playerType, config) {
