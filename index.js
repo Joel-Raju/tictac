@@ -85,27 +85,34 @@ function onBoxClick() {
     var rowIdx = this.getAttribute("rowIdx");
     var colIdx = this.getAttribute("colIdx");
 
-    let winner = isGameWonAlready(); 
-
-    if (winner == playerType || winner == computerType) {
-      showWinner(winner);
-      return;
-    } else if (isGameEnded()) {
-      showGameEnded();
-      return;
-    }
-
     if (grid[colIdx][rowIdx] == 0) {
       let newValue = 1;
       grid[colIdx][rowIdx] = newValue;
       renderMainGrid();
       addClickHandlers();
+    }
+
+    if (!isEndOfGame()) {
       playNextComputerMove();
     }
 }
 
 
 resetGame();
+
+
+function isEndOfGame() {
+  let winner = isGameWonAlready();
+  if (winner == playerType || winner == computerType) {
+    showWinner(winner);
+    return true;
+  } else if (isBoardFull()) {
+    showGameEnded();
+    return true;
+  } else {
+    return false;
+  }
+}
 
 
 function showWinner(type) {
@@ -119,17 +126,7 @@ function showWinner(type) {
 }
 
 function playNextComputerMove() {
-  let winner = isGameWonAlready(); 
-  if (winner == playerType || winner == computerType) {
-    showWinner(winner);
-    return;
-  } else if (isGameEnded()) {
-    showGameEnded();
-    return;
-  }
-
   showComputerThinking();
-  let testConfig = Object.assign(grid);
   let movesToMake = [];
 
   for (let i = 0; i < GRID_LENGTH; i++) {
@@ -146,6 +143,7 @@ function playNextComputerMove() {
   grid[moveToMake.rowIndex][moveToMake.colIndex] = computerType;
   renderMainGrid();
   addClickHandlers();
+  isEndOfGame();
   
 }
 
@@ -186,7 +184,7 @@ function resetGame() {
 }
 
 
-function isGameEnded() {
+function isBoardFull() {
   for (let i = 0; i < GRID_LENGTH; i++) {
     for (let j = 0; j < GRID_LENGTH; j++) {
       if (grid[i][j] == 0) {
