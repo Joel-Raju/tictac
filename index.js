@@ -22,79 +22,82 @@ let grid = [];
 const GRID_LENGTH = 3;
 let turn = 'X';
 
-const playerType = 1;
+const humanPlayer = 1;
 const computerType = 2;
+let humanWinMoves = [];
+let computerWinMoves = [];
+
 
 function initializeGrid() {
-    for (let colIdx = 0;colIdx < GRID_LENGTH; colIdx++) {
-        const tempArray = [];
-        for (let rowidx = 0; rowidx < GRID_LENGTH;rowidx++) {
-            tempArray.push(0);
-        }
-        grid.push(tempArray);
+  for (let colIdx = 0;colIdx < GRID_LENGTH; colIdx++) {
+    const tempArray = [];
+    for (let rowidx = 0; rowidx < GRID_LENGTH;rowidx++) {
+      tempArray.push(0);
     }
+    grid.push(tempArray);
+  }
 }
 
 function getRowBoxes(colIdx) {
-    let rowDivs = '';
-    
-    for(let rowIdx=0; rowIdx < GRID_LENGTH ; rowIdx++ ) {
-        let additionalClass = 'darkBackground';
-        let content = '';
-        const sum = colIdx + rowIdx;
-        if (sum%2 === 0) {
-            additionalClass = 'lightBackground'
-        }
-        const gridValue = grid[colIdx][rowIdx];
-        if(gridValue === 1) {
-            content = '<span class="cross">X</span>';
-        }
-        else if (gridValue === 2) {
-            content = '<span class="cross">O</span>';
-        }
-        rowDivs = rowDivs + '<div colIdx="'+ colIdx +'" rowIdx="' + rowIdx + '" class="box ' +
-            additionalClass + '">' + content + '</div>';
+  let rowDivs = '';
+  
+  for(let rowIdx=0; rowIdx < GRID_LENGTH ; rowIdx++ ) {
+    let additionalClass = 'darkBackground';
+    let content = '';
+    const sum = colIdx + rowIdx;
+    if (sum%2 === 0) {
+      additionalClass = 'lightBackground'
     }
-    return rowDivs;
+    const gridValue = grid[colIdx][rowIdx];
+    if(gridValue === 1) {
+      content = '<span class="cross">X</span>';
+    }
+    else if (gridValue === 2) {
+      content = '<span class="cross">O</span>';
+    }
+    rowDivs = rowDivs + '<div colIdx="'+ colIdx +'" rowIdx="' + rowIdx + '" class="box ' +
+      additionalClass + '">' + content + '</div>';
+  }
+  return rowDivs;
 }
 
 function getColumns() {
-    let columnDivs = '';
-    for(let colIdx=0; colIdx < GRID_LENGTH; colIdx++) {
-        let coldiv = getRowBoxes(colIdx);
-        coldiv = '<div class="rowStyle">' + coldiv + '</div>';
-        columnDivs = columnDivs + coldiv;
-    }
-    return columnDivs;
+  let columnDivs = '';
+  for(let colIdx=0; colIdx < GRID_LENGTH; colIdx++) {
+    let coldiv = getRowBoxes(colIdx);
+    coldiv = '<div class="rowStyle">' + coldiv + '</div>';
+    columnDivs = columnDivs + coldiv;
+  }
+  return columnDivs;
 }
 
 function renderMainGrid() {
-    const parent = document.getElementById("grid");
-    const columnDivs = getColumns();
-    parent.innerHTML = '<div class="columnsStyle">' + columnDivs + '</div>';
+  const parent = document.getElementById("grid");
+  const columnDivs = getColumns();
+  parent.innerHTML = '<div class="columnsStyle">' + columnDivs + '</div>';
 }
 
 function addClickHandlers() {
-    var boxes = document.getElementsByClassName("box");
-    for (var idx = 0; idx < boxes.length; idx++) {
-      boxes[idx].addEventListener('click', onBoxClick, false);
-    }
+  var boxes = document.getElementsByClassName("box");
+  for (var idx = 0; idx < boxes.length; idx++) {
+    boxes[idx].addEventListener('click', onBoxClick, false);
+  }
 }
 
 function onBoxClick() {
-    var rowIdx = this.getAttribute("rowIdx");
-    var colIdx = this.getAttribute("colIdx");
+  var rowIdx = this.getAttribute("rowIdx");
+  var colIdx = this.getAttribute("colIdx");
 
-    if (grid[colIdx][rowIdx] == 0) {
-      let newValue = 1;
-      grid[colIdx][rowIdx] = newValue;
-      renderMainGrid();
-      addClickHandlers();
-    }
+  if (grid[colIdx][rowIdx] == 0) {
+    let newValue = 1;
+    grid[colIdx][rowIdx] = newValue;
+    renderMainGrid();
+    addClickHandlers();
+  }
 
-    if (!isEndOfGame()) {
-      playNextComputerMove();
-    }
+  if (!isEndOfGame()) {
+    playNextComputerMove();
+  }
 }
 
 
@@ -103,7 +106,7 @@ resetGame();
 
 function isEndOfGame() {
   let winner = isGameWonAlready();
-  if (winner == playerType || winner == computerType) {
+  if (winner == humanPlayer || winner == computerType) {
     showWinner(winner);
     return true;
   } else if (isBoardFull()) {
@@ -118,7 +121,7 @@ function isEndOfGame() {
 function showWinner(type) {
   let winnerElement = document.getElementById('winner');
   document.getElementById('computer-thinking').innerText = '';
-  if (type == playerType) {
+  if (type == humanPlayer) {
     winnerElement.innerText = 'The humans won...';
   } else {
     winnerElement.innerText = 'The bots won...';
@@ -140,6 +143,14 @@ function playNextComputerMove() {
   let randomIndex = getRandomNumber(0, movesToMake.length);
   let moveToMake = movesToMake[randomIndex];
 
+  if (computerWinMoves.length > 0) {
+    randomIndex = getRandomNumber(0, computerWinMoves.length);
+    moveToMake = computerWinMoves[randomIndex];
+  } else if (humanWinMoves.length > 0) {
+    randomIndex = getRandomNumber(0, humanWinMoves.length);
+    moveToMake = humanWinMoves[randomIndex];
+  }
+
   grid[moveToMake.rowIndex][moveToMake.colIndex] = computerType;
   renderMainGrid();
   addClickHandlers();
@@ -154,7 +165,6 @@ function showComputerThinking() {
     if (!isEndOfGame()) {
       thinkingElement.innerText = 'Humans turn';    
     }
-    
   }, randomTime);
   
 }
@@ -165,8 +175,8 @@ function getRandomNumber(lowerLimit, upperLimit) {
 }
 
 function isGameWonAlready() {
-  if (hasWon(playerType)) {
-    return playerType;
+  if (hasWon(humanPlayer)) {
+    return humanPlayer;
   } else if (hasWon(computerType)) {
     return computerType;
   } else {
@@ -204,19 +214,36 @@ function showGameEnded() {
 }
 
 
-function hasWon(playerType) {
+function hasWon(player) {
   let counter = 0;
+
+  if (player == humanPlayer) {
+    humanWinMoves = [];  
+  } else if (player == computerType) {
+    computerWinMoves = [];
+  }
 
   // check rows
   for (let i = 0; (i < GRID_LENGTH); i++) {
     counter = 0;
     for (let j = 0; (j < GRID_LENGTH); j++) {
-      if (grid[i][j] == playerType) {
+      if (grid[i][j] == player) {
         counter++;
       }
     }
+
     if (counter == GRID_LENGTH) {
       return true;
+    } else if (counter == GRID_LENGTH - 1) {
+      for (let j = 0; j < GRID_LENGTH; j++) {
+        if (grid[i][j] == 0) {
+          if (player == humanPlayer) {
+            humanWinMoves.push({rowIndex: i, colIndex: j});  
+          } else {
+            humanWinMoves.push({rowIndex: i, colIndex: j});
+          }
+        }
+      }
     }
   }
 
@@ -225,37 +252,67 @@ function hasWon(playerType) {
   for (let i = 0; (i < GRID_LENGTH); i++) {
     counter = 0;
     for (let j = 0; (j < GRID_LENGTH); j++) {
-      if (grid[j][i] == playerType) {
+      if (grid[j][i] == player) {
         counter++;
       }
     }
     if (counter == GRID_LENGTH) {
       return true;
+    } else if (counter == GRID_LENGTH -1) {
+      for (let j = 0; (j < GRID_LENGTH); j++) {
+        if (grid[j][i] == 0) {
+          if (player == humanPlayer) {
+            humanWinMoves.push({rowIndex: j, colIndex: i});  
+          } else {
+            computerWinMoves.push({rowIndex: j, colIndex: i});
+          }
+        }
+      }
     }
   }
 
   // L-R diagonal
   counter = 0;
   for (let i = 0; i < GRID_LENGTH; i++) {
-    if (grid[i][i] == playerType) {
+    if (grid[i][i] == player) {
       counter++;
     }
   }
 
   if (counter == GRID_LENGTH) {
     return true;
+  } else if (counter == GRID_LENGTH -1) {
+    for (let i = 0; i < GRID_LENGTH; i++) {
+      if (grid[i][i] == 0) {
+        if (player == humanPlayer) {
+          humanWinMoves.push({rowIndex: i, colIndex: i});
+        } else {
+          computerWinMoves.push({rowIndex: i, colIndex: i});
+        }
+      }
+    }
   }
 
   counter = 0;
   // R-L diagonal
   for (let i = 0; (i < GRID_LENGTH) ; i++) {
-    if (grid[i][GRID_LENGTH - (i+1)] == playerType) {
+    if (grid[i][GRID_LENGTH - (i+1)] == player) {
       counter++;
     }
   }
 
   if (counter == GRID_LENGTH) {
     return true;
+  } else if (counter == GRID_LENGTH - 1) {
+    for (let i = 0; (i < GRID_LENGTH) ; i++) {
+      if (grid[i][GRID_LENGTH - (i+1)] == 0) {
+        if (player == humanPlayer) {
+          humanWinMoves.push({rowIndex: i, colIndex: (GRID_LENGTH - (i+1)) });
+        } else {
+          computerWinMoves.push({rowIndex: i, colIndex: (GRID_LENGTH - (i+1)) });
+        }
+      }
+    }
   }
 
   return false;
