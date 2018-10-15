@@ -144,7 +144,6 @@ function playNextComputerMove() {
   renderMainGrid();
   addClickHandlers();
   isEndOfGame();
-  
 }
 
 function showComputerThinking() {
@@ -152,7 +151,10 @@ function showComputerThinking() {
   thinkingElement.innerText = 'The bot is thinking ...';
   var randomTime = getRandomNumber(0, 700);
   setTimeout(() => {
-    thinkingElement.innerText = 'Humans turn';  
+    if (!isEndOfGame()) {
+      thinkingElement.innerText = 'Humans turn';    
+    }
+    
   }, randomTime);
   
 }
