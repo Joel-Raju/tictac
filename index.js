@@ -129,16 +129,13 @@ function playNextComputerMove() {
   }
 
   showComputerThinking();
-  let currentConfig = grid[0].toString() +',' + grid[1].toString() + ',' + grid[2].toString();
-  currentConfig = currentConfig.split(',');
-  let testConfig = currentConfig;
+  let testConfig = Object.assign(grid);
   let movesToMake = [];
 
-  for (let i = 0; i < 9; i++) {
-    if (testConfig[i] == 0) {
-      testConfig[i] = 2;
-      if (!hasWon(playerType, testConfig)) {
-        movesToMake.push(i);
+  for (let i = 0; i < GRID_LENGTH; i++) {
+    for (let j = 0; j < GRID_LENGTH; j++) {
+      if (grid[i][j] == 0) {
+        movesToMake.push({rowIndex: i, colIndex: j});
       }
     }
   }
@@ -146,13 +143,10 @@ function playNextComputerMove() {
   let randomIndex = getRandomNumber(0, movesToMake.length);
   let moveToMake = movesToMake[randomIndex];
 
-  if (moveToMake >= 0) {
-    let rowIndex = parseInt(moveToMake /3);
-    let columnIndex = parseInt(moveToMake % 3);
-    grid[rowIndex][columnIndex] = computerType;
-    renderMainGrid();
-    addClickHandlers();
-  }
+  grid[moveToMake.rowIndex][moveToMake.colIndex] = computerType;
+  renderMainGrid();
+  addClickHandlers();
+  
 }
 
 function showComputerThinking() {
@@ -171,11 +165,9 @@ function getRandomNumber(lowerLimit, upperLimit) {
 }
 
 function isGameWonAlready() {
-  let currentConfig = grid[0].toString() +',' + grid[1].toString() + ',' + grid[2].toString();
-  currentConfig = currentConfig.split(',');
-  if (hasWon(playerType, currentConfig)) {
+  if (hasWon(playerType)) {
     return playerType;
-  } else if (hasWon(computerType, currentConfig)) {
+  } else if (hasWon(computerType)) {
     return computerType;
   } else {
     return 0;
@@ -210,33 +202,6 @@ function showGameEnded() {
   gameEndElement.innerText = 'Game Ended, please reset';
   document.getElementById('computer-thinking').innerText = '';
 }
-
-
-// function hasWon(playerType, config) {
-//   const winningConfig = [
-//     [0, 1, 2],
-//     [3, 4, 5],
-//     [6, 7, 8],
-//     [0, 3, 6],
-//     [1, 4, 7],
-//     [2, 5, 8],
-//     [0, 4, 8],
-//     [2, 4, 6]
-//   ];
-
-//   for (let i=0; i<9; i++) {
-//     if (winningConfig[i]) {
-//       if (config[winningConfig[i][0]] == playerType && 
-//         config[winningConfig[i][1]] == playerType && 
-//         config[winningConfig[i][2]] == playerType) {
-//         return true;
-//       } 
-//     }
-//   }
-//   return false;
-// }
-
-
 
 
 function hasWon(playerType) {
