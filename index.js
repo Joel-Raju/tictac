@@ -133,6 +133,7 @@ function playNextComputerMove() {
   currentConfig = currentConfig.split(',');
   let testConfig = currentConfig;
   let movesToMake = [];
+
   for (let i = 0; i < 9; i++) {
     if (testConfig[i] == 0) {
       testConfig[i] = 2;
@@ -194,15 +195,14 @@ function resetGame() {
 
 
 function isGameEnded() {
-  let currentConfig = grid[0].toString() +',' + grid[1].toString() + ',' + grid[2].toString();
-  currentConfig = currentConfig.split(',');
-  var isEnded = true;
-  for (let i=0; i<9; i++) {
-    if (currentConfig[i] != playerType && currentConfig[i] != computerType) {
-      isEnded = false;
+  for (let i = 0; i < GRID_LENGTH; i++) {
+    for (let j = 0; j < GRID_LENGTH; j++) {
+      if (grid[i][j] == 0) {
+        return false;
+      }
     }
   }
-  return isEnded;
+  return true;
 }
 
 function showGameEnded() {
@@ -212,26 +212,86 @@ function showGameEnded() {
 }
 
 
-function hasWon(playerType, config) {
-  const winningConfig = [
-    [0, 1, 2],
-    [3, 4, 5],
-    [6, 7, 8],
-    [0, 3, 6],
-    [1, 4, 7],
-    [2, 5, 8],
-    [0, 4, 8],
-    [2, 4, 6]
-  ];
+// function hasWon(playerType, config) {
+//   const winningConfig = [
+//     [0, 1, 2],
+//     [3, 4, 5],
+//     [6, 7, 8],
+//     [0, 3, 6],
+//     [1, 4, 7],
+//     [2, 5, 8],
+//     [0, 4, 8],
+//     [2, 4, 6]
+//   ];
 
-  for (let i=0; i<9; i++) {
-    if (winningConfig[i]) {
-      if (config[winningConfig[i][0]] == playerType && 
-        config[winningConfig[i][1]] == playerType && 
-        config[winningConfig[i][2]] == playerType) {
-        return true;
-      } 
+//   for (let i=0; i<9; i++) {
+//     if (winningConfig[i]) {
+//       if (config[winningConfig[i][0]] == playerType && 
+//         config[winningConfig[i][1]] == playerType && 
+//         config[winningConfig[i][2]] == playerType) {
+//         return true;
+//       } 
+//     }
+//   }
+//   return false;
+// }
+
+
+
+
+function hasWon(playerType) {
+  let counter = 0;
+
+  // check rows
+  for (let i = 0; (i < GRID_LENGTH); i++) {
+    counter = 0;
+    for (let j = 0; (j < GRID_LENGTH); j++) {
+      if (grid[i][j] == playerType) {
+        counter++;
+      }
+    }
+    if (counter == GRID_LENGTH) {
+      return true;
     }
   }
+
+
+  // check columns
+  for (let i = 0; (i < GRID_LENGTH); i++) {
+    counter = 0;
+    for (let j = 0; (j < GRID_LENGTH); j++) {
+      if (grid[j][i] == playerType) {
+        counter++;
+      }
+    }
+    if (counter == GRID_LENGTH) {
+      return true;
+    }
+  }
+
+  // L-R diagonal
+  counter = 0;
+  for (let i = 0; i < GRID_LENGTH; i++) {
+    if (grid[i][i] == playerType) {
+      counter++;
+    }
+  }
+
+  if (counter == GRID_LENGTH) {
+    return true;
+  }
+
+  counter = 0;
+  // R-L diagonal
+  for (let i = 0; (i < GRID_LENGTH) ; i++) {
+    if (grid[i][GRID_LENGTH - (i+1)] == playerType) {
+      counter++;
+    }
+  }
+
+  if (counter == GRID_LENGTH) {
+    return true;
+  }
+
   return false;
 }
