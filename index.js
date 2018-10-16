@@ -26,6 +26,7 @@ const humanPlayer = 1;
 const computerType = 2;
 let humanWinMoves = [];
 let computerWinMoves = [];
+let isResetNeeded = false;
 
 
 function initializeGrid() {
@@ -85,6 +86,9 @@ function addClickHandlers() {
 }
 
 function onBoxClick() {
+  if (isResetNeeded) {
+    return;
+  }
   var rowIdx = this.getAttribute("rowIdx");
   var colIdx = this.getAttribute("colIdx");
 
@@ -108,11 +112,14 @@ function isEndOfGame() {
   let winner = isGameWonAlready();
   if (winner == humanPlayer || winner == computerType) {
     showWinner(winner);
+    isResetNeeded = true;
     return true;
   } else if (isBoardFull()) {
     showGameEnded();
+    isResetNeeded = true;
     return true;
   } else {
+    isResetNeeded = false;
     return false;
   }
 }
@@ -186,6 +193,7 @@ function isGameWonAlready() {
 
 
 function resetGame() {
+  isResetNeeded = false;
   grid = [];
   initializeGrid();
   renderMainGrid();
